@@ -840,23 +840,48 @@
             learnContent.innerHTML = html;
         }
 
+        // ========================================
+        // 페이지 초기화
+        // ========================================
+
+        // 페이지 로드 시 초기화 함수
+        function initializePage() {
+            // 포트폴리오 카운트 업데이트
+            updatePortfolioCount();
+
+            // 마지막 업데이트 시간 설정
+            const lastUpdate = localStorage.getItem('lastUpdate');
+            if (lastUpdate) {
+                document.getElementById('last-update').textContent = lastUpdate;
+            } else {
+                document.getElementById('last-update').textContent = '아직 업데이트되지 않음';
+            }
+
+            // 트렌드 탭 초기 렌더링
+            renderTrendTab();
+        }
+
+        // DOM이 로드되면 초기화 실행
+        document.addEventListener('DOMContentLoaded', function() {
+            initializePage();
+        });
+
+        // ========================================
         // 데이터 업데이트 버튼
+        // ========================================
         document.getElementById('update-btn').addEventListener('click', async function() {
             this.disabled = true;
             this.textContent = '🔄 업데이트 중...';
 
             await renderTrendTab();
 
-            document.getElementById('last-update').textContent = new Date().toLocaleTimeString('ko-KR');
+            // 현재 시간 표시 및 localStorage에 저장
+            const now = new Date().toLocaleTimeString('ko-KR');
+            document.getElementById('last-update').textContent = now;
+            localStorage.setItem('lastUpdate', now);
 
             this.disabled = false;
             this.textContent = '🔄 데이터 업데이트';
-        });
-
-        // 페이지 로드 시 트렌드 탭 초기 렌더링
-        window.addEventListener('DOMContentLoaded', function() {
-            renderTrendTab();
-            document.getElementById('last-update').textContent = new Date().toLocaleTimeString('ko-KR');
         });
     </script>
 </body>
