@@ -1267,7 +1267,24 @@
         const portfolioManager = new PortfolioManager();
 
         // ========================================
+        // ========================================
+        // data.json 로드 (GitHub Actions가 매일 업데이트)
+        // ========================================
+        async function loadDataJson() {
+            try {
+                const r = await fetch('data.json?t=' + Date.now());
+                if (!r.ok) return null;
+                const d = await r.json();
+                if (!d.trends || !Array.isArray(d.trends)) return null;
+                return d;
+            } catch (_) {
+                return null;
+            }
+        }
+
+        // ========================================
         // 트렌드 탭 렌더링 (XSS 보안 적용)
+        // 우선순위: data.json → Claude API → Mock
         // ========================================
         async function renderTrendTab() {
             const trendsContent = document.getElementById('trends-content');
@@ -1283,17 +1300,25 @@
             loadingDiv.appendChild(loadingText);
             trendsContent.appendChild(loadingDiv);
 
-            // Claude API 호출 시도, 실패 시 mock fallback
-            let data;
-            const apiResult = await callClaudeAPI(TREND_PROMPT);
-            if (!apiResult.error) {
-                const parsed = parseClaudeResponse(apiResult.text);
-                data = parsed || getMockTrendData();
-                if (!parsed) showToast('응답 파싱 실패 — 예시 데이터를 표시합니다.', 'info');
-            } else {
-                data = getMockTrendData();
-                if (!apiResult.error.includes('연결할 수 없습니다')) {
-                    showToast('API 오류 — 예시 데이터를 표시합니다.', 'info');
+            // 1순위: data.json (GitHub Actions 매일 갱신 실제 시세)
+            let data = await loadDataJson();
+            let dataSource = 'live';
+
+            if (!data) {
+                // 2순위: Claude API 직접 호출
+                const apiResult = await callClaudeAPI(TREND_PROMPT);
+                if (!apiResult.error) {
+                    const parsed = parseClaudeResponse(apiResult.text);
+                    data = parsed || getMockTrendData();
+                    dataSource = parsed ? 'claude' : 'mock';
+                    if (!parsed) showToast('응답 파싱 실패 — 예시 데이터를 표시합니다.', 'info');
+                } else {
+                    // 3순위: Mock
+                    data = getMockTrendData();
+                    dataSource = 'mock';
+                    if (!apiResult.error.includes('연결할 수 없습니다')) {
+                        showToast('API 오류 — 예시 데이터를 표시합니다.', 'info');
+                    }
                 }
             }
 
@@ -1415,6 +1440,32 @@
             claudeBox.appendChild(claudeNote);
 
             container.appendChild(claudeBox);
+
+            // 데이터 출처 배지
+            const sourceBadge = document.createElement('p');
+            sourceBadge.style.cssText = 'font-size:12px;color:#999;margin-top:8px;text-align:right';
+            if (dataSource === 'live') {
+                sourceBadge.textContent = '✅ 실제 시세 (GitHub Actions 자동 갱신)';
+                sourceBadge.style.color = '#4CAF50';
+            } else if (dataSource === 'claude') {
+                sourceBadge.textContent = '🤖 Claude API 실시간 분석';
+                sourceBadge.style.color = '#2196F3';
+            } else {
+                sourceBadge.textContent = '⚠️ 예시 데이터 (백엔드 미연결)';
+                sourceBadge.style.color = '#FF9800';
+            }
+            container.appendChild(sourceBadge);
+
+            // 헤더 업데이트 시각 표시
+            const lastUpdateEl = document.getElementById('last-update');
+            if (lastUpdateEl) {
+                if (dataSource === 'live' && data.updated_at) {
+                    lastUpdateEl.textContent = data.updated_at;
+                } else {
+                    const now = new Date();
+                    lastUpdateEl.textContent = now.toLocaleTimeString('ko-KR');
+                }
+            }
 
             // 콘텐츠 업데이트
             trendsContent.innerHTML = '';

@@ -1,0 +1,36 @@
+{
+  "updated_at": "2026-06-12 18:26 KST",
+  "trends": [
+    {
+      "symbol": "AAPL",
+      "name": "Apple Inc.",
+      "type": "주식",
+      "price": "$295.63",
+      "change": "+1.4%",
+      "change_num": 1.388984155291862,
+      "description": "Apple은 iPhone, Mac 등을 만드는 세계 최대 기업 중 하나예요.",
+      "risk": "중간 (기술주)"
+    },
+    {
+      "symbol": "BTC",
+      "name": "Bitcoin",
+      "type": "암호화폐",
+      "price": "$63,592",
+      "change": "+1.4%",
+      "change_num": 1.3532028188146223,
+      "description": "디지털 화폐로, 은행 없이 거래해요. 수익은 높지만 매우 변동성이 크죠.",
+      "risk": "높음 (초보자는 주의)"
+    },
+    {
+      "symbol": "VOO",
+      "name": "Vanguard S&P 500 ETF",
+      "type": "ETF",
+      "price": "$678.23",
+      "change": "+1.7%",
+      "change_num": 1.6760362791395045,
+      "description": "500개 회사에 자동으로 분산 투자하는 펀드예요. 가장 안전한 선택입니다.",
+      "risk": "낮음"
+    }
+  ],
+  "guideTip": "투자 초보자는 먼저 '배우기' 탭에서 기초를 배우세요. VOO 같은 ETF로 시작하면 가장 안전합니다."
+}
