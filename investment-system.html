@@ -478,6 +478,264 @@
             font-weight: bold;
         }
 
+        /* ===== MOBILE RESPONSIVE DESIGN (768px breakpoint) ===== */
+        @media (max-width: 768px) {
+            /* Container adjustments */
+            .container {
+                max-width: 100%;
+                padding: 12px;
+            }
+
+            /* Header adjustments */
+            .header {
+                padding: 16px;
+                margin-bottom: 16px;
+            }
+
+            .header h1 {
+                font-size: 20px;
+                margin-bottom: 12px;
+            }
+
+            .header-info {
+                flex-direction: column;
+                gap: 12px;
+                align-items: flex-start;
+            }
+
+            .portfolio-summary {
+                font-size: 12px;
+            }
+
+            .update-btn {
+                width: 100%;
+                padding: 12px 16px;
+                font-size: 13px;
+            }
+
+            /* Tab adjustments */
+            .tabs {
+                flex-wrap: wrap;
+                gap: 8px;
+                margin-bottom: 16px;
+            }
+
+            .tab-button {
+                flex: 1;
+                min-width: calc(33.333% - 6px);
+                padding: 10px 12px;
+                font-size: 12px;
+            }
+
+            /* Tab content adjustments */
+            .tab-content {
+                padding: 16px;
+                margin-bottom: 16px;
+            }
+
+            /* Card grid adjustments */
+            .cards-container {
+                grid-template-columns: 1fr;
+                gap: 16px;
+                margin-bottom: 16px;
+            }
+
+            .card {
+                padding: 16px;
+            }
+
+            .card h3 {
+                font-size: 14px;
+                margin-bottom: 8px;
+            }
+
+            .card-type {
+                font-size: 11px;
+            }
+
+            .card-info {
+                font-size: 12px;
+            }
+
+            .description {
+                font-size: 12px;
+            }
+
+            .add-btn {
+                padding: 8px 12px;
+                font-size: 11px;
+            }
+
+            /* Claude tip box */
+            .claude-box {
+                padding: 16px;
+                margin-top: 16px;
+            }
+
+            .claude-box h3 {
+                font-size: 14px;
+                margin-bottom: 10px;
+            }
+
+            .claude-box p {
+                font-size: 12px;
+            }
+
+            /* Loading state */
+            .loading {
+                padding: 30px;
+            }
+
+            .spinner {
+                width: 18px;
+                height: 18px;
+                border: 2px solid #f3f3f3;
+                border-top: 2px solid #4CAF50;
+            }
+
+            /* Error message */
+            .error-message {
+                padding: 10px;
+                font-size: 12px;
+            }
+
+            /* Portfolio item */
+            .portfolio-item {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 12px;
+                margin-bottom: 8px;
+                gap: 10px;
+            }
+
+            .portfolio-item-info h4 {
+                font-size: 13px;
+            }
+
+            .portfolio-item-info p {
+                font-size: 11px;
+            }
+
+            .remove-btn {
+                width: 100%;
+                padding: 8px 12px;
+                font-size: 11px;
+            }
+
+            /* Learning content */
+            .learning-section h3 {
+                font-size: 14px;
+                margin-bottom: 8px;
+            }
+
+            .learning-section p {
+                font-size: 12px;
+            }
+
+            .tip-box {
+                padding: 10px;
+                margin-top: 8px;
+            }
+
+            /* Footer */
+            .footer {
+                font-size: 11px;
+                margin-top: 30px;
+                padding: 16px;
+            }
+
+            /* Utility classes mobile adjustments */
+            .mb-20 {
+                margin-bottom: 16px;
+            }
+
+            .mb-10 {
+                margin-bottom: 8px;
+            }
+
+            .mb-30 {
+                margin-bottom: 20px;
+            }
+
+            .mt-20 {
+                margin-top: 16px;
+            }
+
+            .mt-30 {
+                margin-top: 20px;
+            }
+
+            .mt-10 {
+                margin-top: 8px;
+            }
+
+            .p-40 {
+                padding: 20px;
+            }
+
+            .empty-container {
+                padding: 30px;
+            }
+
+            .empty-message {
+                font-size: 14px;
+                margin-bottom: 8px;
+            }
+
+            .empty-guide {
+                font-size: 12px;
+            }
+
+            .advice-box {
+                margin-top: 20px;
+            }
+        }
+
+        /* ===== EXTRA SMALL DEVICES (max-width: 480px) ===== */
+        @media (max-width: 480px) {
+            .container {
+                padding: 8px;
+            }
+
+            .header {
+                padding: 12px;
+                margin-bottom: 12px;
+            }
+
+            .header h1 {
+                font-size: 18px;
+                margin-bottom: 10px;
+            }
+
+            .tab-button {
+                min-width: calc(50% - 4px);
+                padding: 8px 10px;
+                font-size: 11px;
+            }
+
+            .card {
+                padding: 12px;
+            }
+
+            .card h3 {
+                font-size: 13px;
+            }
+
+            .update-btn {
+                font-size: 12px;
+                padding: 10px 12px;
+            }
+
+            .portfolio-item {
+                padding: 10px;
+            }
+
+            .remove-btn {
+                font-size: 10px;
+                padding: 6px 10px;
+            }
+        }
+
     </style>
 </head>
 <body>
