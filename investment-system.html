@@ -392,6 +392,11 @@
                 // 클릭한 탭만 활성화
                 document.getElementById(tabName).classList.add('active');
                 this.classList.add('active');
+
+                // 트렌드 탭 렌더링
+                if (tabName === 'trends') {
+                    renderTrendTab();
+                }
             });
         });
 
@@ -537,6 +542,109 @@
 
         // 전역 포트폴리오 매니저 인스턴스
         const portfolioManager = new PortfolioManager();
+
+        // ========================================
+        // 트렌드 탭 렌더링
+        // ========================================
+        async function renderTrendTab() {
+            const trendsContent = document.getElementById('trends-content');
+            trendsContent.innerHTML = '<div class="loading"><div class="spinner"></div> 데이터 로드 중...</div>';
+
+            // 모의 데이터 사용 (API 키 없을 때)
+            const data = getMockTrendData();
+
+            let html = '<h2 style="margin-bottom: 20px;">🔥 지금 주목할 투자 상품 (Claude 추천)</h2>';
+            html += '<div class="cards-container">';
+
+            // 각 트렌드 카드 렌더링
+            data.trends.forEach(trend => {
+                const isAdded = portfolioManager.getAll().some(item => item.symbol === trend.symbol);
+
+                html += `
+                    <div class="card">
+                        <h3>${trend.symbol}</h3>
+                        <p class="card-type">${trend.type} | ${trend.name}</p>
+                        <div class="card-divider"></div>
+
+                        <div class="card-info">
+                            <span class="card-info-label">💰 가격:</span>
+                            <span class="card-info-value">${trend.price}</span>
+                        </div>
+
+                        <div class="card-info">
+                            <span class="card-info-label">📈 변동:</span>
+                            <span class="price-up">${trend.change}</span>
+                        </div>
+
+                        <div class="card-divider"></div>
+
+                        <div style="margin: 10px 0;">
+                            <strong style="font-size: 12px;">💡 초보자 설명:</strong>
+                            <p class="description">${trend.description}</p>
+                        </div>
+
+                        <button class="add-btn ${isAdded ? 'added' : ''}"
+                                onclick="addToPortfolio('${trend.symbol}', '${trend.name}', '${trend.type}')"
+                                ${isAdded ? 'disabled' : ''}>
+                            ${isAdded ? '✓ 포트폴리오에 있음' : '+ 포트폴리오에 추가'}
+                        </button>
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+
+            // Claude 팁 박스
+            html += `
+                <div class="claude-box">
+                    <h3>🤖 Claude의 초보자 팁</h3>
+                    <p>${data.guideTip}</p>
+                    <p>📌 "데이터 업데이트" 버튼을 클릭하면 최신 트렌드를 조회할 수 있습니다.</p>
+                </div>
+            `;
+
+            trendsContent.innerHTML = html;
+        }
+
+        function addToPortfolio(symbol, name, type) {
+            const result = portfolioManager.addItem(symbol, name, type);
+            if (result.success) {
+                // 버튼 업데이트
+                event.target.textContent = '✓ 포트폴리오에 있음';
+                event.target.disabled = true;
+                event.target.classList.add('added');
+
+                // 포트폴리오 카운트 업데이트
+                updatePortfolioCount();
+
+                alert(result.message);
+            } else {
+                alert(result.message);
+            }
+        }
+
+        function updatePortfolioCount() {
+            document.getElementById('portfolio-count').textContent = portfolioManager.getCount();
+        }
+
+        // 데이터 업데이트 버튼
+        document.getElementById('update-btn').addEventListener('click', async function() {
+            this.disabled = true;
+            this.textContent = '🔄 업데이트 중...';
+
+            await renderTrendTab();
+
+            document.getElementById('last-update').textContent = new Date().toLocaleTimeString('ko-KR');
+
+            this.disabled = false;
+            this.textContent = '🔄 데이터 업데이트';
+        });
+
+        // 페이지 로드 시 트렌드 탭 초기 렌더링
+        window.addEventListener('DOMContentLoaded', function() {
+            renderTrendTab();
+            document.getElementById('last-update').textContent = new Date().toLocaleTimeString('ko-KR');
+        });
     </script>
 </body>
 </html>
