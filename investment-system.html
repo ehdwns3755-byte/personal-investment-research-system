@@ -331,6 +331,153 @@
             padding: 20px;
             border-top: 1px solid #eee;
         }
+
+        /* ===== NEW CSS CLASSES FOR INLINE STYLES ===== */
+
+        /* Margin bottom utilities */
+        .mb-20 {
+            margin-bottom: 20px;
+        }
+
+        .mb-10 {
+            margin-bottom: 10px;
+        }
+
+        .mb-30 {
+            margin-bottom: 30px;
+        }
+
+        /* Margin top utilities */
+        .mt-20 {
+            margin-top: 20px;
+        }
+
+        .mt-30 {
+            margin-top: 30px;
+        }
+
+        .mt-10 {
+            margin-top: 10px;
+        }
+
+        /* Margin utilities for sections */
+        .m-10-0 {
+            margin: 10px 0;
+        }
+
+        /* Font size utilities */
+        .fs-12 {
+            font-size: 12px;
+        }
+
+        .fs-14 {
+            font-size: 14px;
+        }
+
+        .fs-16 {
+            font-size: 16px;
+        }
+
+        /* Color utilities */
+        .c-999 {
+            color: #999;
+        }
+
+        .c-666 {
+            color: #666;
+        }
+
+        .c-error {
+            color: #C62828;
+        }
+
+        .c-primary {
+            color: #1976D2;
+        }
+
+        /* Text alignment */
+        .ta-center {
+            text-align: center;
+        }
+
+        /* Padding utilities */
+        .p-40 {
+            padding: 40px;
+        }
+
+        /* Font weight bold */
+        .fw-bold {
+            font-weight: bold;
+        }
+
+        /* Description section */
+        .desc-section {
+            margin: 10px 0;
+        }
+
+        .desc-title {
+            font-size: 12px;
+        }
+
+        /* Empty state styles */
+        .empty-container {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .empty-message {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .empty-guide {
+            font-size: 14px;
+        }
+
+        /* Portfolio tab styles */
+        .portfolio-tab-title {
+            margin-bottom: 20px;
+        }
+
+        .portfolio-count {
+            margin-bottom: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* Learn tab styles */
+        .learn-tab-title {
+            margin-bottom: 20px;
+        }
+
+        .learn-description {
+            margin-bottom: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .advice-box {
+            margin-top: 30px;
+        }
+
+        /* List styles in learning content */
+        .learning-list {
+            margin-left: 20px;
+            margin-bottom: 10px;
+        }
+
+        /* Warning/info text styles */
+        .warning-text {
+            color: #C62828;
+            font-weight: bold;
+        }
+
+        .gold-rule-text {
+            color: #1976D2;
+            font-weight: bold;
+        }
+
     </style>
 </head>
 <body>
@@ -611,7 +758,7 @@
 
             // 제목 생성
             const title = document.createElement('h2');
-            title.style.marginBottom = '20px';
+            title.className = 'mb-20';
             title.textContent = '🔥 지금 주목할 투자 상품 (Claude 추천)';
             container.appendChild(title);
 
@@ -678,9 +825,9 @@
 
                 // 설명 섹션
                 const descSection = document.createElement('div');
-                descSection.style.margin = '10px 0';
+                descSection.className = 'desc-section';
                 const descTitle = document.createElement('strong');
-                descTitle.style.fontSize = '12px';
+                descTitle.className = 'desc-title';
                 descTitle.textContent = '💡 초보자 설명:';
                 descSection.appendChild(descTitle);
                 const descText = document.createElement('p');
@@ -764,24 +911,21 @@
 
             // 제목
             const title = document.createElement('h2');
-            title.style.marginBottom = '20px';
+            title.className = 'portfolio-tab-title';
             title.textContent = '💼 내 포트폴리오';
             container.appendChild(title);
 
             if (items.length === 0) {
                 const emptyDiv = document.createElement('div');
-                emptyDiv.style.textAlign = 'center';
-                emptyDiv.style.padding = '40px';
-                emptyDiv.style.color = '#999';
+                emptyDiv.className = 'empty-container';
 
                 const emptyMessage = document.createElement('p');
-                emptyMessage.style.fontSize = '16px';
-                emptyMessage.style.marginBottom = '10px';
+                emptyMessage.className = 'empty-message';
                 emptyMessage.textContent = '아직 추가한 종목이 없습니다.';
                 emptyDiv.appendChild(emptyMessage);
 
                 const emptyGuide = document.createElement('p');
-                emptyGuide.style.fontSize = '14px';
+                emptyGuide.className = 'empty-guide';
                 emptyGuide.textContent = '🔥 트렌드 탭에서 관심 있는 종목을 추가하세요!';
                 emptyDiv.appendChild(emptyGuide);
 
@@ -793,9 +937,7 @@
 
             // 개수 표시
             const countText = document.createElement('p');
-            countText.style.marginBottom = '20px';
-            countText.style.color = '#666';
-            countText.style.fontSize = '14px';
+            countText.className = 'portfolio-count';
             countText.textContent = `총 ${items.length}개 종목`;
             container.appendChild(countText);
 
@@ -830,8 +972,7 @@
 
             // 포트폴리오 분석 섹션
             const analyzeBox = document.createElement('div');
-            analyzeBox.className = 'claude-box';
-            analyzeBox.style.marginTop = '20px';
+            analyzeBox.className = 'claude-box mt-20';
 
             const analyzeTitle = document.createElement('h3');
             analyzeTitle.textContent = '🤖 포트폴리오 분석';
@@ -871,14 +1012,14 @@
                     <p>주식은 회사의 일부를 소유하는 것입니다. 예를 들어, Apple 주식을 100주 소유하면 Apple 회사의 100분의 1 소유자가 되는 거예요.</p>
 
                     <p><strong>주식의 장점:</strong></p>
-                    <ul style="margin-left: 20px; margin-bottom: 10px;">
+                    <ul class="learning-list">
                         <li>회사가 잘되면 주가가 올라가서 이득을 봅니다.</li>
                         <li>배당금(회사 이익의 일부)을 받을 수 있습니다.</li>
                         <li>장기 투자하면 복리 효과를 얻습니다.</li>
                     </ul>
 
                     <p><strong>주식의 위험:</strong></p>
-                    <ul style="margin-left: 20px; margin-bottom: 10px;">
+                    <ul class="learning-list">
                         <li>회사가 잘못되면 주가가 내려갑니다.</li>
                         <li>시장이 불황이 되면 모든 주식이 내려갑니다.</li>
                         <li>단기에 큰 손실을 볼 수 있습니다.</li>
@@ -894,14 +1035,14 @@
                     <p>ETF(Exchange Traded Fund)는 "여러 회사의 주식 모음"입니다. 마치 바구니에 계란을 한 개가 아닌 여러 개를 담는 것처럼, 위험을 분산시킵니다.</p>
 
                     <p><strong>ETF의 장점:</strong></p>
-                    <ul style="margin-left: 20px; margin-bottom: 10px;">
+                    <ul class="learning-list">
                         <li>한 번에 여러 회사에 투자하므로 안전합니다.</li>
                         <li>한 회사가 망해도 영향이 적습니다.</li>
                         <li>관리가 간편합니다 (자동으로 조정됨).</li>
                     </ul>
 
                     <p><strong>유명한 ETF:</strong></p>
-                    <ul style="margin-left: 20px; margin-bottom: 10px;">
+                    <ul class="learning-list">
                         <li>VOO (Vanguard S&P 500 ETF) - 미국 500대 회사 포함</li>
                         <li>VTI (Vanguard Total Stock Market) - 미국 전체 주식</li>
                     </ul>
@@ -916,21 +1057,21 @@
                     <p>암호화폐는 인터넷 위에만 존재하는 돈입니다. 은행이나 정부가 관리하지 않고, 블록체인이라는 기술로 안전하게 거래됩니다.</p>
 
                     <p><strong>암호화폐의 특징:</strong></p>
-                    <ul style="margin-left: 20px; margin-bottom: 10px;">
+                    <ul class="learning-list">
                         <li>은행 계좌가 없어도 거래 가능합니다.</li>
                         <li>빠르고 저렴하게 송금할 수 있습니다.</li>
                         <li>24시간 365일 거래됩니다 (주식은 평일만).</li>
                     </ul>
 
                     <p><strong>암호화폐의 위험:</strong></p>
-                    <ul style="margin-left: 20px; margin-bottom: 10px;">
+                    <ul class="learning-list">
                         <li>가격이 매우 심하게 변합니다 (변동성 높음).</li>
                         <li>해킹 위험이 있습니다.</li>
                         <li>규제가 불명확해서 정부 정책의 영향을 받습니다.</li>
                         <li>투기성이 매우 높습니다.</li>
                     </ul>
 
-                    <p style="color: #C62828; font-weight: bold;">⚠️ 초보자 경고:</p>
+                    <p class="warning-text">⚠️ 초보자 경고:</p>
                     <p>암호화폐는 매우 위험합니다! 전체 자산의 5% 이하만 투자하세요. 잃어도 괜찮은 금액으로 시작하세요.</p>
                 `
             },
@@ -941,7 +1082,7 @@
                     <p>"계란을 한 바구니에 담지 말라"는 투자의 기본 원칙입니다. 한 종목에만 투자하면 그 종목이 망할 때 모든 돈을 잃어버려요.</p>
 
                     <p><strong>분산 투자 예시:</strong></p>
-                    <ul style="margin-left: 20px; margin-bottom: 10px;">
+                    <ul class="learning-list">
                         <li>40% - ETF (안전한 기본)</li>
                         <li>40% - 우량 기업 주식 (Apple, Microsoft 등)</li>
                         <li>15% - 성장주 (작지만 빠르게 자라는 회사)</li>
@@ -949,7 +1090,7 @@
                     </ul>
 
                     <p><strong>분산의 효과:</strong></p>
-                    <ul style="margin-left: 20px; margin-bottom: 10px;">
+                    <ul class="learning-list">
                         <li>한 종목이 50% 떨어져도 전체는 5~10% 정도만 떨어집니다.</li>
                         <li>심리적으로 안정감을 가질 수 있습니다.</li>
                         <li>장기 투자할 때 더 좋은 수익을 얻습니다.</li>
@@ -977,7 +1118,7 @@
                     <p><strong>Step 5: 매도하지 말기</strong></p>
                     <p>한번 투자하면 최소 3-5년은 기다리세요. 가격 변동에 흔들리지 마세요!</p>
 
-                    <p style="color: #1976D2; font-weight: bold;">💡 황금 규칙: "투자는 장거리 경주다. 단거리는 아니다!"</p>
+                    <p class="gold-rule-text">💡 황금 규칙: "투자는 장거리 경주다. 단거리는 아니다!"</p>
                 `
             }
         ];
@@ -992,15 +1133,13 @@
 
             // 제목
             const title = document.createElement('h2');
-            title.style.marginBottom = '20px';
+            title.className = 'learn-tab-title';
             title.textContent = '📚 투자 기초 배우기';
             container.appendChild(title);
 
             // 설명
             const description = document.createElement('p');
-            description.style.marginBottom = '20px';
-            description.style.color = '#666';
-            description.style.fontSize = '14px';
+            description.className = 'learn-description';
             description.textContent = '투자 초보자를 위한 기초 개념들입니다. 각 주제를 자세히 읽어보세요!';
             container.appendChild(description);
 
@@ -1023,8 +1162,7 @@
 
             // Claude 조언
             const adviceBox = document.createElement('div');
-            adviceBox.className = 'claude-box';
-            adviceBox.style.marginTop = '30px';
+            adviceBox.className = 'claude-box advice-box';
 
             const adviceTitle = document.createElement('h3');
             adviceTitle.textContent = '🤖 Claude의 마지막 조언';
