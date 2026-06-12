@@ -36,40 +36,58 @@ const cardHTML = `<div class="card">
 
 ---
 
-### Issue #2: API 키 보안 정책 수립
+### ✅ Issue #2: API 키 보안 정책 수립
 
 **심각도**: 높음 (API 키 노출)  
 **라벨**: `긴급` `API` `보안`  
-**예상 소요시간**: 2시간
+**상태**: ✅ 완료
 
-#### 현황
-브라우저에서 Claude API 키를 직접 사용할 수 없음:
-```javascript
-// 현재 (작동 불가):
-const response = await fetch('https://api.anthropic.com/v1/messages', {
-  headers: { 'x-api-key': apiKey }  // ❌ 브라우저에서 CORS 차단
-});
+#### 해결 내용
+백엔드 프록시 아키텍처 구현:
+
+**구현된 파일**:
+- ✅ `backend/server.js` - Express 프록시 서버 (완료)
+- ✅ `backend/package.json` - 의존성 설정 (완료)
+- ✅ `.env.example` - 환경 변수 템플릿 (완료)
+- ✅ `investment-system.html` - 클라이언트 수정 (완료)
+- ✅ `BACKEND_SETUP.md` - 설정 가이드 (완료)
+- ✅ `start-dev.ps1` - 개발 스크립트 (완료)
+- ✅ `test-api-proxy.ps1` - 테스트 스크립트 (완료)
+
+#### 보안 아키텍처
+```
+브라우저 (API 키 없음)
+    ↓ prompt만 전송
+Express 백엔드 (포트 3001)
+    ↓ API 키로 요청
+Claude API
 ```
 
-#### 해결 옵션
+#### 주요 기능
+1. **API 키 보안**: 환경변수(.env)에 저장, 서버에서만 사용
+2. **CORS 처리**: 백엔드에서 CORS 헤더 관리
+3. **에러 처리**: 상세한 에러 메시지 반환
+4. **로깅**: API 호출 로깅 및 모니터링
+5. **환경별 설정**: 개발/프로덕션 환경 분리
 
-**옵션 A: 백엔드 프록시 (권장)**
-- Express.js 서버 구성
-- `/api/claude` 엔드포인트 작성
-- 서버 환경변수에 API 키 저장
-- 클라이언트는 프록시 엔드포인트만 호출
+#### 사용 방법
+```bash
+# 1. 의존성 설치
+cd backend
+npm install
 
-**옵션 B: 사용자 입력 방식**
-- 사용자가 자신의 API 키 입력
-- localStorage에 저장 (낮은 보안 수준)
+# 2. .env 파일 설정
+ANTHROPIC_API_KEY=sk-ant-your-key
 
-#### 구현 계획 (옵션 A)
-- **Step 1**: Express 서버 추가 (`backend/server.js`)
-- **Step 2**: `/api/claude` POST 엔드포인트 구현
-- **Step 3**: API 키 환경변수 (.env 사용)
-- **Step 4**: CORS 설정
-- **Step 5**: 클라이언트 fetch URL 변경
-- **Step 6**: 배포 스크립트 추가
+# 3. 서버 시작
+npm start
+```
+
+#### 테스트 결과
+- ✅ 헬스 체크 엔드포인트 작동
+- ✅ Claude API 프록시 작동
+- ✅ CORS 문제 해결
+- ✅ 에러 처리 정상
 
 ---
 
