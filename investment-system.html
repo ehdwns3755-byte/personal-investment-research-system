@@ -780,6 +780,71 @@
 
     <script>
         // ========================================
+        // 이슈 #6: 로딩 중 중복 클릭 방지
+        // ========================================
+        /**
+         * 전역 상태 플래그: 데이터 업데이트 중 여부
+         * @type {boolean}
+         */
+        let isUpdating = false;
+
+        /**
+         * 업데이트 타임아웃 ID (필요시 타임아웃 취소용)
+         * @type {number|null}
+         */
+        let updateTimeoutId = null;
+
+        /**
+         * 데이터 업데이트 최대 시간 (밀리초)
+         * 30초 이상 걸리면 자동으로 취소
+         * @type {number}
+         */
+        const UPDATE_TIMEOUT = 30000; // 30초
+
+        /**
+         * isUpdating 플래그를 설정하고 버튼 상태를 업데이트
+         * @param {boolean} updating - 업데이트 상태
+         */
+        function setUpdatingState(updating) {
+            isUpdating = updating;
+            const updateBtn = document.getElementById('update-btn');
+
+            if (updating) {
+                updateBtn.disabled = true;
+                updateBtn.textContent = '🔄 업데이트 중...';
+                updateBtn.style.opacity = '0.6';
+            } else {
+                updateBtn.disabled = false;
+                updateBtn.textContent = '🔄 데이터 업데이트';
+                updateBtn.style.opacity = '1';
+            }
+        }
+
+        /**
+         * 타임아웃 타이머를 시작
+         * 30초 이상 업데이트가 진행 중이면 강제로 종료
+         */
+        function startUpdateTimeout() {
+            updateTimeoutId = setTimeout(() => {
+                if (isUpdating) {
+                    console.warn('[Update] 업데이트 타임아웃 (30초 초과) - 강제 종료');
+                    setUpdatingState(false);
+                    alert('업데이트 시간이 초과되었습니다. 나중에 다시 시도하세요.');
+                }
+            }, UPDATE_TIMEOUT);
+        }
+
+        /**
+         * 타임아웃 타이머를 취소
+         */
+        function cancelUpdateTimeout() {
+            if (updateTimeoutId !== null) {
+                clearTimeout(updateTimeoutId);
+                updateTimeoutId = null;
+            }
+        }
+
+        // ========================================
         // XSS 보안: HTML 특수문자 이스케이프 함수
         // ========================================
         /**
@@ -1475,22 +1540,56 @@
         });
 
         // ========================================
-        // 데이터 업데이트 버튼
+        // 데이터 업데이트 버튼 (이슈 #6: 중복 클릭 방지)
         // ========================================
-        document.getElementById('update-btn').addEventListener('click', async function() {
-            this.disabled = true;
-            this.textContent = '🔄 업데이트 중...';
+        /**
+         * 안전한 데이터 업데이트 함수
+         * - isUpdating 플래그로 중복 클릭 방지
+         * - try-finally로 플래그 안전 관리
+         * - 30초 타임아웃 설정
+         * - 버튼 비활성화 UI 추가
+         */
+        async function updateData() {
+            // 중복 클릭 방지: 이미 업데이트 중이면 함수 종료
+            if (isUpdating) {
+                console.warn('[Update] 이미 업데이트 중입니다. 중복 요청 차단됨');
+                return;
+            }
 
-            await renderTrendTab();
+            try {
+                // 업데이트 시작: 플래그 설정 및 UI 업데이트
+                setUpdatingState(true);
+                console.log('[Update] 업데이트 시작');
 
-            // 현재 시간 표시 및 localStorage에 저장
-            const now = new Date().toLocaleTimeString('ko-KR');
-            document.getElementById('last-update').textContent = now;
-            localStorage.setItem('lastUpdate', now);
+                // 타임아웃 타이머 시작
+                startUpdateTimeout();
 
-            this.disabled = false;
-            this.textContent = '🔄 데이터 업데이트';
-        });
+                // 트렌드 탭 렌더링 (데이터 로드)
+                await renderTrendTab();
+
+                // 현재 시간 표시 및 localStorage에 저장
+                const now = new Date().toLocaleTimeString('ko-KR');
+                document.getElementById('last-update').textContent = now;
+                localStorage.setItem('lastUpdate', now);
+
+                console.log('[Update] 업데이트 완료');
+
+            } catch (error) {
+                // 에러 발생 시 처리
+                console.error('[Update] 업데이트 중 오류 발생:', error);
+                alert('업데이트 중 오류가 발생했습니다. 콘솔을 확인하세요.');
+
+            } finally {
+                // 업데이트 종료: 플래그 해제 및 UI 복원
+                // try/catch 블록을 벗어나면서 항상 실행됨 (성공/실패 관계없이)
+                setUpdatingState(false);
+                cancelUpdateTimeout();
+                console.log('[Update] 업데이트 상태 리셋');
+            }
+        }
+
+        // 버튼 클릭 이벤트 리스너 등록
+        document.getElementById('update-btn').addEventListener('click', updateData);
     </script>
 </body>
 </html>
