@@ -374,7 +374,26 @@
     </div>
 
     <script>
-        // JavaScript 코드는 다음 Task에서 추가됩니다.
+        // 탭 전환 기능
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', function() {
+                const tabName = this.getAttribute('data-tab');
+
+                // 모든 탭 콘텐츠 숨기기
+                document.querySelectorAll('.tab-content').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+
+                // 모든 탭 버튼 비활성화
+                document.querySelectorAll('.tab-button').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+
+                // 클릭한 탭만 활성화
+                document.getElementById(tabName).classList.add('active');
+                this.classList.add('active');
+            });
+        });
     </script>
 </body>
 </html>
