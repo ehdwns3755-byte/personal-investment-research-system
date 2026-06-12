@@ -475,6 +475,68 @@
                 guideTip: '투자 초보자는 먼저 "배우기" 탭에서 기초를 배우세요. AAPL처럼 유명한 기업부터 시작하면 이해하기 쉬워요. 비트코인 같은 암호화폐는 전체 자산의 5% 이하만 투자하세요.'
             };
         }
+
+        // ========================================
+        // 포트폴리오 관리
+        // ========================================
+        class PortfolioManager {
+            constructor() {
+                this.portfolio = [];
+                this.loadFromStorage();
+            }
+
+            loadFromStorage() {
+                const saved = localStorage.getItem('investment-portfolio');
+                if (saved) {
+                    try {
+                        this.portfolio = JSON.parse(saved);
+                    } catch (e) {
+                        console.error('포트폴리오 로드 실패:', e);
+                        this.portfolio = [];
+                    }
+                }
+            }
+
+            saveToStorage() {
+                localStorage.setItem('investment-portfolio', JSON.stringify(this.portfolio));
+            }
+
+            addItem(symbol, name, type) {
+                // 중복 확인
+                if (this.portfolio.some(item => item.symbol === symbol)) {
+                    return { success: false, message: '이미 추가된 종목입니다.' };
+                }
+
+                this.portfolio.push({
+                    symbol,
+                    name,
+                    type,
+                    dateAdded: new Date().toLocaleDateString('ko-KR'),
+                    quantity: 0,
+                    notes: ''
+                });
+
+                this.saveToStorage();
+                return { success: true, message: '포트폴리오에 추가되었습니다.' };
+            }
+
+            removeItem(symbol) {
+                this.portfolio = this.portfolio.filter(item => item.symbol !== symbol);
+                this.saveToStorage();
+                return { success: true, message: '포트폴리오에서 제거되었습니다.' };
+            }
+
+            getAll() {
+                return this.portfolio;
+            }
+
+            getCount() {
+                return this.portfolio.length;
+            }
+        }
+
+        // 전역 포트폴리오 매니저 인스턴스
+        const portfolioManager = new PortfolioManager();
     </script>
 </body>
 </html>
