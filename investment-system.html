@@ -393,9 +393,13 @@
                 document.getElementById(tabName).classList.add('active');
                 this.classList.add('active');
 
-                // 트렌드 탭 렌더링
+                // 각 탭의 콘텐츠 렌더링
                 if (tabName === 'trends') {
                     renderTrendTab();
+                } else if (tabName === 'portfolio') {
+                    renderPortfolioTab();
+                } else if (tabName === 'learn') {
+                    renderLearnTab();
                 }
             });
         });
@@ -625,6 +629,67 @@
 
         function updatePortfolioCount() {
             document.getElementById('portfolio-count').textContent = portfolioManager.getCount();
+        }
+
+        // ========================================
+        // 포트폴리오 탭 렌더링
+        // ========================================
+        function renderPortfolioTab() {
+            const portfolioContent = document.getElementById('portfolio-content');
+            const items = portfolioManager.getAll();
+
+            if (items.length === 0) {
+                portfolioContent.innerHTML = `
+                    <h2 style="margin-bottom: 20px;">💼 내 포트폴리오</h2>
+                    <div style="text-align: center; padding: 40px; color: #999;">
+                        <p style="font-size: 16px; margin-bottom: 10px;">아직 추가한 종목이 없습니다.</p>
+                        <p style="font-size: 14px;">🔥 트렌드 탭에서 관심 있는 종목을 추가하세요!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '<h2 style="margin-bottom: 20px;">💼 내 포트폴리오</h2>';
+            html += `<p style="margin-bottom: 20px; color: #666; font-size: 14px;">총 ${items.length}개 종목</p>`;
+
+            items.forEach(item => {
+                html += `
+                    <div class="portfolio-item">
+                        <div class="portfolio-item-info">
+                            <h4>${item.symbol} - ${item.name}</h4>
+                            <p>${item.type} | 추가날짜: ${item.dateAdded}</p>
+                        </div>
+                        <button class="remove-btn" onclick="removeFromPortfolio('${item.symbol}')">
+                            ❌ 제거
+                        </button>
+                    </div>
+                `;
+            });
+
+            // 포트폴리오 분석 섹션
+            html += `
+                <div class="claude-box" style="margin-top: 20px;">
+                    <h3>🤖 포트폴리오 분석</h3>
+                    <p>당신의 포트폴리오는 다양한 자산으로 구성되어 있습니다.</p>
+                    <p>계속해서 종목을 추가하고, "배우기" 탭에서 투자 전략을 배워보세요!</p>
+                </div>
+            `;
+
+            portfolioContent.innerHTML = html;
+        }
+
+        function removeFromPortfolio(symbol) {
+            if (confirm('정말 이 종목을 제거하시겠습니까?')) {
+                portfolioManager.removeItem(symbol);
+                renderPortfolioTab();
+                updatePortfolioCount();
+                renderTrendTab(); // 트렌드 탭도 업데이트 (버튼 상태)
+            }
+        }
+
+        // Task 7에서 구현될 함수들
+        function renderLearnTab() {
+            // 배우기 탭 렌더링 (Task 7에서 구현)
         }
 
         // 데이터 업데이트 버튼
