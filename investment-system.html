@@ -691,6 +691,65 @@
             }
         }
 
+        /* ===== TOAST NOTIFICATIONS ===== */
+        .toast-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 9999;
+            pointer-events: none;
+        }
+
+        .toast {
+            padding: 12px 18px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            opacity: 0;
+            transform: translateY(12px);
+            transition: opacity 0.25s ease, transform 0.25s ease;
+            max-width: 320px;
+            pointer-events: auto;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast-success {
+            background: #E8F5E9;
+            color: #2E7D32;
+            border-left: 4px solid #4CAF50;
+        }
+
+        .toast-error {
+            background: #FFEBEE;
+            color: #C62828;
+            border-left: 4px solid #F44336;
+        }
+
+        .toast-info {
+            background: #E3F2FD;
+            color: #1565C0;
+            border-left: 4px solid #2196F3;
+        }
+
+        @media (max-width: 768px) {
+            .toast-container {
+                bottom: 16px;
+                right: 12px;
+                left: 12px;
+            }
+            .toast {
+                max-width: 100%;
+            }
+        }
+
         /* ===== EXTRA SMALL DEVICES (max-width: 480px) ===== */
         @media (max-width: 480px) {
             .container {
@@ -778,6 +837,9 @@
         </div>
     </div>
 
+    <!-- Toast 알림 컨테이너 -->
+    <div class="toast-container" id="toast-container"></div>
+
     <script>
         // ========================================
         // 이슈 #6: 로딩 중 중복 클릭 방지
@@ -829,7 +891,7 @@
                 if (isUpdating) {
                     console.warn('[Update] 업데이트 타임아웃 (30초 초과) - 강제 종료');
                     setUpdatingState(false);
-                    alert('업데이트 시간이 초과되었습니다. 나중에 다시 시도하세요.');
+                    showToast('업데이트 시간이 초과되었습니다. 나중에 다시 시도하세요.', 'error');
                 }
             }, UPDATE_TIMEOUT);
         }
@@ -857,6 +919,22 @@
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
+        }
+
+        // ========================================
+        // Toast 알림 (이슈 #11: alert() 교체)
+        // ========================================
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.textContent = message;
+            container.appendChild(toast);
+            requestAnimationFrame(() => toast.classList.add('show'));
+            setTimeout(() => {
+                toast.classList.remove('show');
+                toast.addEventListener('transitionend', () => toast.remove(), { once: true });
+            }, 3000);
         }
 
         // 탭 전환 기능
@@ -955,6 +1033,38 @@
                 return {
                     error: `네트워크 오류: ${err.message}`
                 };
+            }
+        }
+
+        // ========================================
+        // Claude API 트렌드 요청 (이슈 #10)
+        // ========================================
+        const TREND_PROMPT = `당신은 투자 전문가입니다. 현재 주목할 만한 투자 상품 3가지를 초보자 눈높이로 추천해주세요.
+반드시 아래 JSON 형식으로만 응답하세요 (다른 텍스트 없이):
+{
+  "trends": [
+    {
+      "symbol": "종목코드",
+      "name": "종목명",
+      "type": "주식|ETF|암호화폐",
+      "price": "예시가격",
+      "change": "+X.X%",
+      "description": "초보자 설명 2-3줄",
+      "tip": "투자 팁 1줄"
+    }
+  ],
+  "guideTip": "전체 투자 조언 1-2줄"
+}`;
+
+        function parseClaudeResponse(text) {
+            try {
+                const jsonMatch = text.match(/\{[\s\S]*\}/);
+                if (!jsonMatch) throw new Error('JSON not found');
+                const parsed = JSON.parse(jsonMatch[0]);
+                if (!parsed.trends || !Array.isArray(parsed.trends)) throw new Error('Invalid format');
+                return parsed;
+            } catch {
+                return null;
             }
         }
 
@@ -1073,8 +1183,19 @@
             loadingDiv.appendChild(loadingText);
             trendsContent.appendChild(loadingDiv);
 
-            // 모의 데이터 사용 (API 키 없을 때)
-            const data = getMockTrendData();
+            // Claude API 호출 시도, 실패 시 mock fallback
+            let data;
+            const apiResult = await callClaudeAPI(TREND_PROMPT);
+            if (!apiResult.error) {
+                const parsed = parseClaudeResponse(apiResult.text);
+                data = parsed || getMockTrendData();
+                if (!parsed) showToast('응답 파싱 실패 — 예시 데이터를 표시합니다.', 'info');
+            } else {
+                data = getMockTrendData();
+                if (!apiResult.error.includes('연결할 수 없습니다')) {
+                    showToast('API 오류 — 예시 데이터를 표시합니다.', 'info');
+                }
+            }
 
             // 컨테이너 생성
             const container = document.createElement('div');
@@ -1167,8 +1288,8 @@
                 }
                 addBtn.textContent = isAdded ? '✓ 포트폴리오에 있음' : '+ 포트폴리오에 추가';
                 addBtn.disabled = isAdded;
-                addBtn.addEventListener('click', () => {
-                    addToPortfolio(trend.symbol, trend.name, trend.type);
+                addBtn.addEventListener('click', (e) => {
+                    addToPortfolio(trend.symbol, trend.name, trend.type, e);
                 });
                 card.appendChild(addBtn);
 
@@ -1200,22 +1321,18 @@
             trendsContent.appendChild(container);
         }
 
-        function addToPortfolio(symbol, name, type) {
+        function addToPortfolio(symbol, name, type, event) {
             const result = portfolioManager.addItem(escapeHtml(symbol), escapeHtml(name), escapeHtml(type));
             if (result.success) {
-                // 버튼 업데이트 (이미 안전한 객체)
                 if (event && event.target) {
                     event.target.textContent = '✓ 포트폴리오에 있음';
                     event.target.disabled = true;
                     event.target.classList.add('added');
                 }
-
-                // 포트폴리오 카운트 업데이트
                 updatePortfolioCount();
-
-                alert(result.message);
+                showToast(result.message, 'success');
             } else {
-                alert(result.message);
+                showToast(result.message, 'error');
             }
         }
 
@@ -1315,12 +1432,12 @@
             portfolioContent.appendChild(container);
         }
 
-        function removeFromPortfolio(symbol) {
+        async function removeFromPortfolio(symbol) {
             if (confirm('정말 이 종목을 제거하시겠습니까?')) {
                 portfolioManager.removeItem(symbol);
                 renderPortfolioTab();
                 updatePortfolioCount();
-                renderTrendTab(); // 트렌드 탭도 업데이트 (버튼 상태)
+                await renderTrendTab();
             }
         }
 
@@ -1447,6 +1564,18 @@
         ];
 
         // ========================================
+        // 안전한 HTML 삽입 (이슈 #9: innerHTML 일관성)
+        // ========================================
+        function safeInsertHtml(container, htmlString) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(htmlString, 'text/html');
+            doc.querySelectorAll('script, iframe, object').forEach(el => el.remove());
+            while (doc.body.firstChild) {
+                container.appendChild(doc.body.firstChild);
+            }
+        }
+
+        // ========================================
         // 배우기 탭 렌더링 (XSS 보안 적용)
         // ========================================
         function renderLearnTab() {
@@ -1475,9 +1604,8 @@
                 sectionTitle.textContent = escapeHtml(section.title);
                 sectionDiv.appendChild(sectionTitle);
 
-                // 안전한 HTML 콘텐츠 렌더링 (DOMParser 사용)
                 const contentDiv = document.createElement('div');
-                contentDiv.innerHTML = section.content; // 사전에 정의된 안전한 콘텐츠만 사용
+                safeInsertHtml(contentDiv, section.content);
                 sectionDiv.appendChild(contentDiv);
 
                 container.appendChild(sectionDiv);
@@ -1575,9 +1703,8 @@
                 console.log('[Update] 업데이트 완료');
 
             } catch (error) {
-                // 에러 발생 시 처리
                 console.error('[Update] 업데이트 중 오류 발생:', error);
-                alert('업데이트 중 오류가 발생했습니다. 콘솔을 확인하세요.');
+                showToast('업데이트 중 오류가 발생했습니다.', 'error');
 
             } finally {
                 // 업데이트 종료: 플래그 해제 및 UI 복원
