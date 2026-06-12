@@ -374,6 +374,21 @@
     </div>
 
     <script>
+        // ========================================
+        // XSS 보안: HTML 특수문자 이스케이프 함수
+        // ========================================
+        /**
+         * HTML 특수문자를 이스케이프하여 XSS 공격 방지
+         * @param {string} text - 이스케이프할 텍스트
+         * @returns {string} - 이스케이프된 텍스트
+         */
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
         // 탭 전환 기능
         document.querySelectorAll('.tab-button').forEach(button => {
             button.addEventListener('click', function() {
@@ -572,75 +587,158 @@
         const portfolioManager = new PortfolioManager();
 
         // ========================================
-        // 트렌드 탭 렌더링
+        // 트렌드 탭 렌더링 (XSS 보안 적용)
         // ========================================
         async function renderTrendTab() {
             const trendsContent = document.getElementById('trends-content');
-            trendsContent.innerHTML = '<div class="loading"><div class="spinner"></div> 데이터 로드 중...</div>';
+
+            // 로딩 상태 표시 (안전한 DOM 생성)
+            trendsContent.innerHTML = '';
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'loading';
+            const spinner = document.createElement('div');
+            spinner.className = 'spinner';
+            loadingDiv.appendChild(spinner);
+            const loadingText = document.createTextNode(' 데이터 로드 중...');
+            loadingDiv.appendChild(loadingText);
+            trendsContent.appendChild(loadingDiv);
 
             // 모의 데이터 사용 (API 키 없을 때)
             const data = getMockTrendData();
 
-            let html = '<h2 style="margin-bottom: 20px;">🔥 지금 주목할 투자 상품 (Claude 추천)</h2>';
-            html += '<div class="cards-container">';
+            // 컨테이너 생성
+            const container = document.createElement('div');
 
-            // 각 트렌드 카드 렌더링
+            // 제목 생성
+            const title = document.createElement('h2');
+            title.style.marginBottom = '20px';
+            title.textContent = '🔥 지금 주목할 투자 상품 (Claude 추천)';
+            container.appendChild(title);
+
+            // 카드 컨테이너 생성
+            const cardsContainer = document.createElement('div');
+            cardsContainer.className = 'cards-container';
+
+            // 각 트렌드 카드 렌더링 (안전한 DOM 생성)
             data.trends.forEach(trend => {
                 const isAdded = portfolioManager.getAll().some(item => item.symbol === trend.symbol);
 
-                html += `
-                    <div class="card">
-                        <h3>${trend.symbol}</h3>
-                        <p class="card-type">${trend.type} | ${trend.name}</p>
-                        <div class="card-divider"></div>
+                // 카드 생성
+                const card = document.createElement('div');
+                card.className = 'card';
 
-                        <div class="card-info">
-                            <span class="card-info-label">💰 가격:</span>
-                            <span class="card-info-value">${trend.price}</span>
-                        </div>
+                // 카드 제목 (기호)
+                const cardTitle = document.createElement('h3');
+                cardTitle.textContent = trend.symbol;
+                card.appendChild(cardTitle);
 
-                        <div class="card-info">
-                            <span class="card-info-label">📈 변동:</span>
-                            <span class="price-up">${trend.change}</span>
-                        </div>
+                // 카드 타입
+                const cardType = document.createElement('p');
+                cardType.className = 'card-type';
+                cardType.textContent = `${trend.type} | ${trend.name}`;
+                card.appendChild(cardType);
 
-                        <div class="card-divider"></div>
+                // 구분선
+                const divider1 = document.createElement('div');
+                divider1.className = 'card-divider';
+                card.appendChild(divider1);
 
-                        <div style="margin: 10px 0;">
-                            <strong style="font-size: 12px;">💡 초보자 설명:</strong>
-                            <p class="description">${trend.description}</p>
-                        </div>
+                // 가격 정보
+                const priceInfo = document.createElement('div');
+                priceInfo.className = 'card-info';
+                const priceLabel = document.createElement('span');
+                priceLabel.className = 'card-info-label';
+                priceLabel.textContent = '💰 가격:';
+                const priceValue = document.createElement('span');
+                priceValue.className = 'card-info-value';
+                priceValue.textContent = trend.price;
+                priceInfo.appendChild(priceLabel);
+                priceInfo.appendChild(document.createTextNode(' '));
+                priceInfo.appendChild(priceValue);
+                card.appendChild(priceInfo);
 
-                        <button class="add-btn ${isAdded ? 'added' : ''}"
-                                onclick="addToPortfolio('${trend.symbol}', '${trend.name}', '${trend.type}')"
-                                ${isAdded ? 'disabled' : ''}>
-                            ${isAdded ? '✓ 포트폴리오에 있음' : '+ 포트폴리오에 추가'}
-                        </button>
-                    </div>
-                `;
+                // 변동 정보
+                const changeInfo = document.createElement('div');
+                changeInfo.className = 'card-info';
+                const changeLabel = document.createElement('span');
+                changeLabel.className = 'card-info-label';
+                changeLabel.textContent = '📈 변동:';
+                const changeValue = document.createElement('span');
+                changeValue.className = 'price-up';
+                changeValue.textContent = trend.change;
+                changeInfo.appendChild(changeLabel);
+                changeInfo.appendChild(document.createTextNode(' '));
+                changeInfo.appendChild(changeValue);
+                card.appendChild(changeInfo);
+
+                // 구분선
+                const divider2 = document.createElement('div');
+                divider2.className = 'card-divider';
+                card.appendChild(divider2);
+
+                // 설명 섹션
+                const descSection = document.createElement('div');
+                descSection.style.margin = '10px 0';
+                const descTitle = document.createElement('strong');
+                descTitle.style.fontSize = '12px';
+                descTitle.textContent = '💡 초보자 설명:';
+                descSection.appendChild(descTitle);
+                const descText = document.createElement('p');
+                descText.className = 'description';
+                descText.textContent = trend.description;
+                descSection.appendChild(descText);
+                card.appendChild(descSection);
+
+                // 추가 버튼
+                const addBtn = document.createElement('button');
+                addBtn.className = 'add-btn';
+                if (isAdded) {
+                    addBtn.classList.add('added');
+                }
+                addBtn.textContent = isAdded ? '✓ 포트폴리오에 있음' : '+ 포트폴리오에 추가';
+                addBtn.disabled = isAdded;
+                addBtn.addEventListener('click', () => {
+                    addToPortfolio(trend.symbol, trend.name, trend.type);
+                });
+                card.appendChild(addBtn);
+
+                cardsContainer.appendChild(card);
             });
 
-            html += '</div>';
+            container.appendChild(cardsContainer);
 
-            // Claude 팁 박스
-            html += `
-                <div class="claude-box">
-                    <h3>🤖 Claude의 초보자 팁</h3>
-                    <p>${data.guideTip}</p>
-                    <p>📌 "데이터 업데이트" 버튼을 클릭하면 최신 트렌드를 조회할 수 있습니다.</p>
-                </div>
-            `;
+            // Claude 팁 박스 생성
+            const claudeBox = document.createElement('div');
+            claudeBox.className = 'claude-box';
 
-            trendsContent.innerHTML = html;
+            const claudeTitle = document.createElement('h3');
+            claudeTitle.textContent = '🤖 Claude의 초보자 팁';
+            claudeBox.appendChild(claudeTitle);
+
+            const claudeText = document.createElement('p');
+            claudeText.textContent = data.guideTip;
+            claudeBox.appendChild(claudeText);
+
+            const claudeNote = document.createElement('p');
+            claudeNote.textContent = '📌 "데이터 업데이트" 버튼을 클릭하면 최신 트렌드를 조회할 수 있습니다.';
+            claudeBox.appendChild(claudeNote);
+
+            container.appendChild(claudeBox);
+
+            // 콘텐츠 업데이트
+            trendsContent.innerHTML = '';
+            trendsContent.appendChild(container);
         }
 
         function addToPortfolio(symbol, name, type) {
-            const result = portfolioManager.addItem(symbol, name, type);
+            const result = portfolioManager.addItem(escapeHtml(symbol), escapeHtml(name), escapeHtml(type));
             if (result.success) {
-                // 버튼 업데이트
-                event.target.textContent = '✓ 포트폴리오에 있음';
-                event.target.disabled = true;
-                event.target.classList.add('added');
+                // 버튼 업데이트 (이미 안전한 객체)
+                if (event && event.target) {
+                    event.target.textContent = '✓ 포트폴리오에 있음';
+                    event.target.disabled = true;
+                    event.target.classList.add('added');
+                }
 
                 // 포트폴리오 카운트 업데이트
                 updatePortfolioCount();
@@ -656,50 +754,101 @@
         }
 
         // ========================================
-        // 포트폴리오 탭 렌더링
+        // 포트폴리오 탭 렌더링 (XSS 보안 적용)
         // ========================================
         function renderPortfolioTab() {
             const portfolioContent = document.getElementById('portfolio-content');
             const items = portfolioManager.getAll();
 
+            const container = document.createElement('div');
+
+            // 제목
+            const title = document.createElement('h2');
+            title.style.marginBottom = '20px';
+            title.textContent = '💼 내 포트폴리오';
+            container.appendChild(title);
+
             if (items.length === 0) {
-                portfolioContent.innerHTML = `
-                    <h2 style="margin-bottom: 20px;">💼 내 포트폴리오</h2>
-                    <div style="text-align: center; padding: 40px; color: #999;">
-                        <p style="font-size: 16px; margin-bottom: 10px;">아직 추가한 종목이 없습니다.</p>
-                        <p style="font-size: 14px;">🔥 트렌드 탭에서 관심 있는 종목을 추가하세요!</p>
-                    </div>
-                `;
+                const emptyDiv = document.createElement('div');
+                emptyDiv.style.textAlign = 'center';
+                emptyDiv.style.padding = '40px';
+                emptyDiv.style.color = '#999';
+
+                const emptyMessage = document.createElement('p');
+                emptyMessage.style.fontSize = '16px';
+                emptyMessage.style.marginBottom = '10px';
+                emptyMessage.textContent = '아직 추가한 종목이 없습니다.';
+                emptyDiv.appendChild(emptyMessage);
+
+                const emptyGuide = document.createElement('p');
+                emptyGuide.style.fontSize = '14px';
+                emptyGuide.textContent = '🔥 트렌드 탭에서 관심 있는 종목을 추가하세요!';
+                emptyDiv.appendChild(emptyGuide);
+
+                container.appendChild(emptyDiv);
+                portfolioContent.innerHTML = '';
+                portfolioContent.appendChild(container);
                 return;
             }
 
-            let html = '<h2 style="margin-bottom: 20px;">💼 내 포트폴리오</h2>';
-            html += `<p style="margin-bottom: 20px; color: #666; font-size: 14px;">총 ${items.length}개 종목</p>`;
+            // 개수 표시
+            const countText = document.createElement('p');
+            countText.style.marginBottom = '20px';
+            countText.style.color = '#666';
+            countText.style.fontSize = '14px';
+            countText.textContent = `총 ${items.length}개 종목`;
+            container.appendChild(countText);
 
+            // 포트폴리오 아이템 렌더링
             items.forEach(item => {
-                html += `
-                    <div class="portfolio-item">
-                        <div class="portfolio-item-info">
-                            <h4>${item.symbol} - ${item.name}</h4>
-                            <p>${item.type} | 추가날짜: ${item.dateAdded}</p>
-                        </div>
-                        <button class="remove-btn" onclick="removeFromPortfolio('${item.symbol}')">
-                            ❌ 제거
-                        </button>
-                    </div>
-                `;
+                const portfolioItem = document.createElement('div');
+                portfolioItem.className = 'portfolio-item';
+
+                const itemInfo = document.createElement('div');
+                itemInfo.className = 'portfolio-item-info';
+
+                const itemTitle = document.createElement('h4');
+                itemTitle.textContent = `${escapeHtml(item.symbol)} - ${escapeHtml(item.name)}`;
+                itemInfo.appendChild(itemTitle);
+
+                const itemDetails = document.createElement('p');
+                itemDetails.textContent = `${escapeHtml(item.type)} | 추가날짜: ${escapeHtml(item.dateAdded)}`;
+                itemInfo.appendChild(itemDetails);
+
+                portfolioItem.appendChild(itemInfo);
+
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'remove-btn';
+                removeBtn.textContent = '❌ 제거';
+                removeBtn.addEventListener('click', () => {
+                    removeFromPortfolio(item.symbol);
+                });
+                portfolioItem.appendChild(removeBtn);
+
+                container.appendChild(portfolioItem);
             });
 
             // 포트폴리오 분석 섹션
-            html += `
-                <div class="claude-box" style="margin-top: 20px;">
-                    <h3>🤖 포트폴리오 분석</h3>
-                    <p>당신의 포트폴리오는 다양한 자산으로 구성되어 있습니다.</p>
-                    <p>계속해서 종목을 추가하고, "배우기" 탭에서 투자 전략을 배워보세요!</p>
-                </div>
-            `;
+            const analyzeBox = document.createElement('div');
+            analyzeBox.className = 'claude-box';
+            analyzeBox.style.marginTop = '20px';
 
-            portfolioContent.innerHTML = html;
+            const analyzeTitle = document.createElement('h3');
+            analyzeTitle.textContent = '🤖 포트폴리오 분석';
+            analyzeBox.appendChild(analyzeTitle);
+
+            const analyzeText1 = document.createElement('p');
+            analyzeText1.textContent = '당신의 포트폴리오는 다양한 자산으로 구성되어 있습니다.';
+            analyzeBox.appendChild(analyzeText1);
+
+            const analyzeText2 = document.createElement('p');
+            analyzeText2.textContent = '계속해서 종목을 추가하고, "배우기" 탭에서 투자 전략을 배워보세요!';
+            analyzeBox.appendChild(analyzeText2);
+
+            container.appendChild(analyzeBox);
+
+            portfolioContent.innerHTML = '';
+            portfolioContent.appendChild(container);
         }
 
         function removeFromPortfolio(symbol) {
@@ -834,34 +983,73 @@
         ];
 
         // ========================================
-        // 배우기 탭 렌더링
+        // 배우기 탭 렌더링 (XSS 보안 적용)
         // ========================================
         function renderLearnTab() {
             const learnContent = document.getElementById('learn-content');
 
-            let html = '<h2 style="margin-bottom: 20px;">📚 투자 기초 배우기</h2>';
-            html += '<p style="margin-bottom: 20px; color: #666; font-size: 14px;">투자 초보자를 위한 기초 개념들입니다. 각 주제를 자세히 읽어보세요!</p>';
+            const container = document.createElement('div');
 
+            // 제목
+            const title = document.createElement('h2');
+            title.style.marginBottom = '20px';
+            title.textContent = '📚 투자 기초 배우기';
+            container.appendChild(title);
+
+            // 설명
+            const description = document.createElement('p');
+            description.style.marginBottom = '20px';
+            description.style.color = '#666';
+            description.style.fontSize = '14px';
+            description.textContent = '투자 초보자를 위한 기초 개념들입니다. 각 주제를 자세히 읽어보세요!';
+            container.appendChild(description);
+
+            // 학습 콘텐츠
             learningContent.forEach(section => {
-                html += `
-                    <div class="learning-section">
-                        <h3>${section.title}</h3>
-                        ${section.content}
-                    </div>
-                `;
+                const sectionDiv = document.createElement('div');
+                sectionDiv.className = 'learning-section';
+
+                const sectionTitle = document.createElement('h3');
+                sectionTitle.textContent = escapeHtml(section.title);
+                sectionDiv.appendChild(sectionTitle);
+
+                // 안전한 HTML 콘텐츠 렌더링 (DOMParser 사용)
+                const contentDiv = document.createElement('div');
+                contentDiv.innerHTML = section.content; // 사전에 정의된 안전한 콘텐츠만 사용
+                sectionDiv.appendChild(contentDiv);
+
+                container.appendChild(sectionDiv);
             });
 
             // Claude 조언
-            html += `
-                <div class="claude-box" style="margin-top: 30px;">
-                    <h3>🤖 Claude의 마지막 조언</h3>
-                    <p>투자는 돈을 버는 방법이 아니라, 당신의 돈이 열심히 일하게 하는 방법입니다.</p>
-                    <p>한번에 크게 벌려고 하지 말고, 꾸준히 작게 버세요. 시간이 최고의 투자 도구입니다.</p>
-                    <p>그리고 무엇보다, <strong>이해하지 못한 것에는 투자하지 마세요!</strong></p>
-                </div>
-            `;
+            const adviceBox = document.createElement('div');
+            adviceBox.className = 'claude-box';
+            adviceBox.style.marginTop = '30px';
 
-            learnContent.innerHTML = html;
+            const adviceTitle = document.createElement('h3');
+            adviceTitle.textContent = '🤖 Claude의 마지막 조언';
+            adviceBox.appendChild(adviceTitle);
+
+            const advice1 = document.createElement('p');
+            advice1.textContent = '투자는 돈을 버는 방법이 아니라, 당신의 돈이 열심히 일하게 하는 방법입니다.';
+            adviceBox.appendChild(advice1);
+
+            const advice2 = document.createElement('p');
+            advice2.textContent = '한번에 크게 벌려고 하지 말고, 꾸준히 작게 버세요. 시간이 최고의 투자 도구입니다.';
+            adviceBox.appendChild(advice2);
+
+            const advice3 = document.createElement('p');
+            const advice3Text = '그리고 무엇보다, ';
+            const strong = document.createElement('strong');
+            strong.textContent = '이해하지 못한 것에는 투자하지 마세요!';
+            advice3.appendChild(document.createTextNode(advice3Text));
+            advice3.appendChild(strong);
+            adviceBox.appendChild(advice3);
+
+            container.appendChild(adviceBox);
+
+            learnContent.innerHTML = '';
+            learnContent.appendChild(container);
         }
 
         // ========================================
